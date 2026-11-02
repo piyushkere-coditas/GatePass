@@ -13,6 +13,7 @@ Send reliable, transactional emails on key visit events. Email is the **only** n
 | `visit.checked_in` | Host | `visitor-arrived` | "{visitor} has checked in at {time}", link to mark Meeting Over |
 | `visit.force_checked_out` | Host | `visitor-force-checked-out` | Reason |
 | `visit.cancelled` | — | none | |
+| `auth.code_requested` | The user signing in | `login-code` | "Your Gate Pass sign-in code is 123456. It expires in 10 minutes." No links. Priority, sent immediately |
 
 No emails are sent to visitors in v1. Emails never contain photos.
 
@@ -24,7 +25,8 @@ No emails are sent to visitors in v1. Emails never contain photos.
 | NT-3 | Templates use MJML/Handlebars with Coditas branding and a plain-text alternative. Times are shown in IST. |
 | NT-4 | Links point to `APP_BASE_URL`. No action tokens in emails (approval requires login). |
 | NT-5 | Admins can see FAILED emails in the admin panel and retry them. |
-| NT-6 | Each email is idempotent per (visitId, template, recipient). Duplicates are not enqueued twice. |
+| NT-6 | Each email is idempotent per (visitId, template, recipient). Duplicates are not enqueued twice. Login-code emails use the LoginCode id as the dedupe key. |
+| NT-7 | **Priority items** (`login-code`): the worker is triggered immediately on enqueue instead of waiting for the next 15 s tick (target: delivered to SMTP within 2 s). After a priority item is SENT, secrets in its payload (`code`) are removed. Built in Phase 1 together with NT-1/NT-2. |
 
 ## Key Acceptance Scenarios
 The full TDD suite (unit, integration, UI, traceability) is in [test-cases.md](test-cases.md).

@@ -12,9 +12,9 @@ The business wants to know **who came, who invited them, and who came unplanned*
 
 | Role | Who | Login |
 |---|---|---|
-| **Employee (Host)** | Any Coditas employee | Google Workspace SSO (`@coditas.com`) |
-| **Security** | Gate security guards | Google Workspace SSO with their own `@coditas.com` accounts. An Admin pre-registers them with role SECURITY |
-| **Admin** | Admin/Facilities/HR | Google Workspace SSO. Role granted by another Admin. First admin seeded: piyush.kere@coditas.com |
+| **Employee (Host)** | Any Coditas employee | Email one-time code to their `@coditas.com` address |
+| **Security** | Gate security guards | Email one-time code to their own `@coditas.com` address. An Admin pre-registers them with role SECURITY |
+| **Admin** | Admin/Facilities/HR | Email one-time code. Role granted by another Admin. First admin seeded: piyush.kere@coditas.com |
 
 An Admin is also an Employee and can host visitors. Security users cannot host visitors.
 
@@ -60,7 +60,7 @@ Captured at check-in: **visitor photo**, **ID photo** (both required). **No ID n
 | Topic | Decision |
 |---|---|
 | Stack | React (Vite + TS) · NestJS · PostgreSQL (Prisma) |
-| Auth | Google Workspace SSO for **everyone**, including guards. No app-managed passwords |
+| Auth | **Email one-time code** (6 digits, 10 min) to an `@coditas.com` address for **everyone**, including guards. No passwords, no Google/OAuth dependency (changed 2026-11-02; Google SSO may be added later as an extra option) |
 | Notifications | **Email only** (no Slack, no SMS). The portal UI refreshes live, but this is not a notification channel |
 | Approval timeout | Escalate to all Admins after 10 min (configurable) |
 | Hosting | AWS: ECS Fargate, RDS PostgreSQL, S3, SES, Terraform |
@@ -90,7 +90,7 @@ Captured at check-in: **visitor photo**, **ID photo** (both required). **No ID n
 
 ## 8. Resolved Questions (2026-10-30)
 
-All open questions are closed. No open items remain.
+Q1–Q10 are closed. Q11 was raised by the sign-in change and is open (working assumption noted).
 
 | # | Question | Decision |
 |---|---|---|
@@ -99,7 +99,8 @@ All open questions are closed. No open items remain.
 | Q3 | Visit purposes | **Interview, Client Meeting, Vendor / Delivery, Personal, Other** (Other requires a note) |
 | Q4 | Gates | **Single site (Nyati), single gate.** No gate selection in the app |
 | Q5 | "the logout ... doesn't check out" | **Logging out never changes a visitor's status.** Check-out is always an explicit security action |
-| Q6 | Guard accounts | **Guards use Coditas Google accounts.** An Admin pre-registers them with role SECURITY. No local passwords anywhere |
+| Q6 | Guard accounts | **Guards have `@coditas.com` accounts.** An Admin pre-registers them with role SECURITY. No local passwords anywhere. *(2026-11-02: sign-in changed from Google SSO to an email one-time code.)* |
+| Q11 | Can guards read their Coditas email on duty to receive sign-in codes? | **Open — assumed yes** (phone or the gate tablet). If not, add an admin-issued fallback code |
 | Q7 | Hosting | **AWS** (ECS Fargate, RDS PostgreSQL, S3, SES, Terraform) |
 | Q8 | E2E framework | **Playwright for Java + TestNG + Page Object Model + Allure reporting**, as a separate Maven project `e2e/` |
 | Q9 | Planned visitor arrives on a different date | **Security registers them as unplanned** and the host approves. Check-in stays limited to the scheduled date |

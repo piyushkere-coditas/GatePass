@@ -19,7 +19,7 @@
 ### Repo layout (monorepo, pnpm workspaces)
 ```
 apps/web        React + Vite + TS, React Router, TanStack Query, React Hook Form + Zod, Tailwind (Coditas brand)
-apps/api        NestJS, Prisma, Passport (google-oauth20, local), class-validator
+apps/api        NestJS, Prisma, email one-time-code auth + JWT cookies, Zod validation
 packages/shared Zod schemas, enums (VisitStatus, Role, Purpose), API types shared by web and api
 infra/          docker-compose (postgres, minio, mailhog), Dockerfiles, CI workflows
 docs/           requirements, plan, specs
@@ -33,18 +33,18 @@ enum VisitType   { PLANNED UNPLANNED }
 enum Purpose     { INTERVIEW CLIENT_MEETING VENDOR_DELIVERY PERSONAL OTHER }
 enum VisitStatus { SCHEDULED PENDING_APPROVAL APPROVED REJECTED CHECKED_IN MEETING_OVER CHECKED_OUT CANCELLED }
 
-model User {                       // everyone signs in with Google Workspace (no local passwords)
+model User {                       // everyone signs in with an email one-time code (no passwords)
   id String @id @default(uuid())
   email String @unique             // lower-cased @coditas.com address
-  name String                      // from Google profile; placeholder until first login if pre-registered
+  name String                      // set by admin on pre-registration, else derived from the email
   role Role @default(EMPLOYEE)
   isActive Boolean @default(true)
-  googleSub String? @unique        // set on first login
   lastLoginAt DateTime?            // null = pre-registered, not yet signed in
   createdById String?              // admin who pre-registered the user
   createdAt DateTime @default(now())
 }
 
+model LoginCode    { id, email, codeHash, expiresAt, attempts, consumedAt, invalidatedAt, requestIp, createdAt }
 model RefreshToken { id, userId, familyId, tokenHash, expiresAt, revokedAt, createdAt }
 
 model Visitor {                   // reused across visits for autofill

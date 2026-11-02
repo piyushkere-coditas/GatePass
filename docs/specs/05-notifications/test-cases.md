@@ -28,6 +28,7 @@ Fixtures and conventions: [../TESTING.md](../TESTING.md). Integration tests use 
 | approval-decided-by-admin | `{admin} {approved\|rejected} your visitor {visitor}` |
 | visitor-arrived | `{visitor} has checked in` |
 | visitor-force-checked-out | `{visitor} was checked out by security` |
+| login-code | `Your Gate Pass sign-in code: {code}` |
 
 ## Integration
 | ID | Pri | Given | When | Then |
@@ -42,6 +43,8 @@ Fixtures and conventions: [../TESTING.md](../TESTING.md). Integration tests use 
 | NT-I-08 | P0 | 50 PENDING rows, 2 worker instances | Run both ticks concurrently | Each email sent exactly once (`FOR UPDATE SKIP LOCKED`) |
 | NT-I-09 | P1 | Escalation; admins carol, frank, inactive admin X | Escalate | 2 rows (no X) |
 | NT-I-10 | P1 | FAILED row | carol `GET /admin/emails?status=FAILED` then `POST /admin/emails/:id/retry`; alice same | carol: listed, then PENDING with attempts=0; alice: 403 |
+| NT-I-11 | P0 | Worker idle (next tick 15 s away) | Enqueue a `login-code` item | Delivered to MailHog within 2 s without waiting for the tick; after SENT the row's `payload` has no `code` |
+| NT-I-12 | P1 | `login-code` and 10 visit emails PENDING | Worker run | `login-code` is sent first |
 
 ## Traceability
 | Req | Tests |
@@ -54,3 +57,4 @@ Fixtures and conventions: [../TESTING.md](../TESTING.md). Integration tests use 
 | NT-5 admin retry | NT-I-10, AD-C-06 |
 | NT-6 idempotency | NT-I-03, UV-I-17 |
 | Privacy (no photos/phone in emails) | NT-U-07 |
+| NT-7 priority login codes, payload scrubbed | NT-I-11, NT-I-12, AU-I-31 |

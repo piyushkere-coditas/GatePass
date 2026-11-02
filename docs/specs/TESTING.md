@@ -43,7 +43,7 @@ Allure severity mapping: P0 → BLOCKER/CRITICAL, P1 → NORMAL, P2 → MINOR.
 
 **Fixed clock:** "now" = **Mon 2026-11-02 10:00 IST** (`2026-11-02T04:30:00Z`) unless a test says otherwise. Use `jest.useFakeTimers()` / an injectable `Clock` service. Never call `new Date()` directly in production code.
 
-All users are Google Workspace accounts (no passwords).
+All users are `@coditas.com` accounts that sign in with an email one-time code (no passwords).
 
 | Key | Email | Role | Notes |
 |---|---|---|---|
@@ -65,10 +65,10 @@ All users are Google Workspace accounts (no passwords).
 
 **Fake media:** `test/assets/face.jpg` (valid JPEG 1.2 MB, 4000×3000, has EXIF GPS), `id.png`, `fake.pdf.jpg` (PDF bytes, .jpg name), `big.jpg` (3 MB).
 
-**Test-only auth:** Google itself is never called in automated tests.
-- Callback tests (AU-I-01..08) stub the Google token/profile exchange.
+**Test-only auth:**
+- Sign-in tests (AU-I-01..08, AU-I-25..31) exercise the real email-code flow; they read the code from the outbox payload (or inject a fixed code generator). E2E-07 reads it from MailHog.
 - All other API and E2E tests log in with `POST /__test/login {email}`, which issues the same session cookies as a real login. The route is registered only when `NODE_ENV=test`. Tests `SM-I-13` and `AU-I-24` prove it is absent otherwise.
-- A real Google sign-in is checked manually once per release on staging (smoke checklist).
+- A real sign-in with a code delivered via SES is checked manually once per release on staging (smoke checklist).
 
 **E2E project (`e2e/`, Maven):**
 ```

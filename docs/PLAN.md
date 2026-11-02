@@ -28,18 +28,19 @@ For every story: take the test IDs from the module's **Traceability** table → 
 - CI: lint → typecheck → unit → integration (Testcontainers Postgres) → build images.
 - **Exit:** all `SM-*` tests green (00-architecture/test-cases.md). `docker compose up` gives a running web + API + DB.
 
-### Phase 1 — Auth & Users (spec 01)
-- Google OAuth for all roles (hd restriction), JIT provisioning, admin pre-registration of guards, JWT cookies, refresh rotation, per-request role/active check.
-- Role guards, `/me`, route protection in the SPA, role-based landing, gate "Switch guard".
+### Phase 1 — Auth & Users (spec 01) + Email outbox core (spec 05 NT-1/2/7)
+- Email outbox + worker (SMTP; MailHog locally — Docker image or the standalone Windows `MailHog.exe`, no admin needed), priority sending and payload scrubbing, `login-code` template.
+- Email one-time-code sign-in for all roles (coditas.com only, hashed codes, expiry, attempt and rate limits), JIT provisioning, admin pre-registration of guards, JWT cookies, refresh rotation, per-request role/active check.
+- Role guards, `/me`, route protection in the SPA, two-step login screen, role-based landing, gate "Switch guard".
 - Admin user management screens. Bootstrap admin piyush.kere@coditas.com.
-- `e2e/` Maven project: Playwright Java + TestNG + POM + Allure, BaseTest, TestApi, first Page Objects (LoginPage, AdminUsersPage, GateDashboardPage shell).
-- **Exit:** all `AU-*` tests green. E2E-07 and E2E-08 green.
+- `e2e/` Maven project: Playwright Java + TestNG + POM + Allure, BaseTest, TestApi, MailHogClient, first Page Objects (LoginPage, AdminUsersPage, GateDashboardPage shell).
+- **Exit:** all `AU-*` tests plus NT-U-02..06, NT-I-03..08 and NT-I-11..12 green. E2E-07 and E2E-08 green.
 
-### Phase 2 — Planned Visits (spec 02) + Email outbox skeleton (spec 05 NT-1/2)
+### Phase 2 — Planned Visits (spec 02)
 - Visit create/edit/cancel/meeting-over APIs, visitor lookup.
 - My Visits list, form, detail with timeline.
-- Transactional outbox + worker + `visit-scheduled` template.
-- **Exit:** all `PV-*` tests plus NT-U-01..07 and NT-I-01..08 green. E2E-06 green.
+- Visit transitions write to the outbox via `TransitionHook`; `visit-scheduled` template.
+- **Exit:** all `PV-*` tests plus NT-U-01, NT-U-07 and NT-I-01..02 green. E2E-06 green.
 
 ### Phase 3 — Media + Gate Operations (specs 07, 04)
 - Presigned uploads, verification, signed viewing, authorization.
@@ -91,5 +92,6 @@ Story's test IDs written first (red), then green · API documented in OpenAPI (S
 | Hosts ignore approval emails | Escalation to admins; future v2: Slack/Chat |
 | Guards unfamiliar with the app | Large-button tablet UI, short training, UAT with real guards |
 | Privacy complaints over ID photos | ID photo only (no numbers), restricted access, audited views, retention purge, consent notice at the gate |
-| Guards' Google accounts not ready before UAT | IT to create guard accounts in Phase 1. Admin pre-registers them as SECURITY |
-| Shared gate tablet left logged in across shifts | 8 h session cap, visible guard name, "Switch guard" button, Google account chooser on login |
+| Guards' `@coditas.com` mailboxes not ready, or guards can't read email on duty (Q11) | IT creates guard mailboxes in Phase 1; confirm access on the gate tablet/phone during UAT. Fallback if needed: admin-issued one-time code |
+| Login emails delayed or landing in spam | Priority sending (NT-7), SPF/DKIM for the SES sender domain, plain-text code in the subject so it shows in notifications |
+| Shared gate tablet left logged in across shifts | 8 h session cap, visible guard name, "Switch guard" button that returns to an empty login form |

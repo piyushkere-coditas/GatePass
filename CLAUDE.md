@@ -43,7 +43,7 @@ Run lint, typecheck and the affected tests before saying work is done.
 
 ## Auth & roles
 
-Everyone (employees, security guards, admins) signs in with Google Workspace (`@coditas.com`); no local passwords. Roles: EMPLOYEE, SECURITY, ADMIN. Bootstrap admin: `BOOTSTRAP_ADMIN_EMAIL`. Security users cannot host visits.
+Everyone (employees, security guards, admins) signs in with an **email one-time code** sent to their `@coditas.com` address — no passwords, no Google/OAuth. Codes are 6 digits, hashed at rest, 10-minute expiry, single use, rate-limited, never logged. Roles: EMPLOYEE, SECURITY, ADMIN. Bootstrap admin: `BOOTSTRAP_ADMIN_EMAIL`. Security users cannot host visits.
 
 ## Environment notes
 
