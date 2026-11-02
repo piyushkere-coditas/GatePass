@@ -93,4 +93,4 @@ Run: `mvn test -Dsuite=smoke` / `-Dsuite=regression`, then `allure serve target/
 - Every API error test asserts **status code + error `code`**, not only the status.
 - Every state-changing test also asserts the `VisitEvent` row and, where relevant, the `EmailOutbox` row.
 - Role checks use the shared parametrized matrix (`AU-I-21`) so new endpoints must be added to it.
-- Coverage gates in CI: `apps/api` ≥ 80% lines, `VisitStateService` 100% branches, `packages/shared` ≥ 90%.
+- Coverage gates in CI: `visit-state.machine.ts` 100% (unit), `packages/shared` ≥ 90% (unit). `VisitStateService` is covered by integration tests (SM-I-*). The `apps/api` ≥ 80% overall gate is added once feature modules exist (Phase 1+), measured over unit + integration runs.

@@ -42,6 +42,8 @@ Fixtures and conventions: [../TESTING.md](../TESTING.md). Write these **first**.
 | SM-U-20 | P0 | Phone normaliser | "98765 43210", "+91-98765-43210", "009198765 43210", "12345", "abc" | First three → `+919876543210`; last two invalid |
 | SM-U-21 | P0 | Visitor name rule | length 1 / 2 / 100 / 101, "   " | 1 fail, 2 ok, 100 ok, 101 fail, blank fail |
 | SM-U-22 | P1 | Visit code generator | date 2026-11-02, seq 7; seq 10000 | `GP-20261102-0007`; `GP-20261102-10000` (no truncation) |
+| SM-U-28 | P0 | Shared `TRANSITIONS` table | Compare with a literal copy of spec 00 §3 | Exactly equal; terminal statuses have no outgoing transitions (guards SM-U-15, which derives from the table) |
+| SM-U-29 | P0 | Shared enums | Compare with the enums parsed from `schema.prisma`; purpose labels | Identical values and order; labels match REQUIREMENTS Q3 |
 
 ## Integration — Persistence, Locking, Events
 | ID | Pri | Given | When | Then |
@@ -74,3 +76,4 @@ Fixtures and conventions: [../TESTING.md](../TESTING.md). Write these **first**.
 | AC-ARCH-3 one event per transition | SM-I-01, SM-I-04 |
 | AC-ARCH-4 docker compose | SM-I-14 |
 | Cross-cutting (errors, CORS, logging, timezone) | SM-U-19..22, SM-I-07..13 |
+| Shared table/enums stay correct and in sync | SM-U-28, SM-U-29 |

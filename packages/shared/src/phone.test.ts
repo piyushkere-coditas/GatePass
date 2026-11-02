@@ -17,7 +17,7 @@ describe('normalizePhone', () => {
     expect(normalizePhone('+44 20 7946 0958')).toBe('+442079460958');
   });
 
-  it.each(['12345', 'abc', '', '   ', '+12', '55555 55555', '+91 98765'])(
+  it.each(['12345', 'abc', '', '   ', '+12', '55555 55555', '+91 98765', '+91+9876543210', '98765+43210'])(
     '[SM-U-20] rejects "%s"',
     (input) => {
       expect(normalizePhone(input)).toBeNull();
