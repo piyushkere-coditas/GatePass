@@ -1,0 +1,22 @@
+node_modules/
+dist/
+coverage/
+*.log
+.env
+.env.*.local
+!.env.example
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Prisma
+apps/api/prisma/*.db
+
+# E2E (Maven / Allure)
+e2e/target/
+allure-results/
+allure-report/
+
+# Local embedded Postgres (pnpm db:dev)
+.data/

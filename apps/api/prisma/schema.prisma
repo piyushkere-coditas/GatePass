@@ -1,0 +1,224 @@
+// Coditas Gate Pass — data model (docs/specs/00-architecture/specs.md §2)
+// Enums must stay in sync with packages/shared/src/enums.ts.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  EMPLOYEE
+  SECURITY
+  ADMIN
+}
+
+enum VisitType {
+  PLANNED
+  UNPLANNED
+}
+
+enum Purpose {
+  INTERVIEW
+  CLIENT_MEETING
+  VENDOR_DELIVERY
+  PERSONAL
+  OTHER
+}
+
+enum VisitStatus {
+  SCHEDULED
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  CHECKED_IN
+  MEETING_OVER
+  CHECKED_OUT
+  CANCELLED
+}
+
+enum MediaKind {
+  VISITOR_PHOTO
+  ID_PHOTO
+}
+
+enum EmailStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+/// Everyone signs in with Google Workspace; no local passwords.
+model User {
+  id          String    @id @default(uuid()) @db.Uuid
+  email       String    @unique /// lower-cased @coditas.com
+  name        String
+  role        Role      @default(EMPLOYEE)
+  isActive    Boolean   @default(true)
+  googleSub   String?   @unique
+  lastLoginAt DateTime? /// null = pre-registered, not yet signed in
+  createdById String?   @db.Uuid
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  hostedVisits  Visit[]        @relation("VisitHost")
+  createdVisits Visit[]        @relation("VisitCreatedBy")
+  refreshTokens RefreshToken[]
+
+  @@index([role, isActive])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  familyId  String    @db.Uuid
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([familyId])
+}
+
+/// Reused across visits for returning-visitor autofill.
+model Visitor {
+  id        String   @id @default(uuid()) @db.Uuid
+  fullName  String
+  phone     String   @unique /// E.164
+  email     String?
+  company   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  visits Visit[]
+}
+
+model Visit {
+  id                  String      @id @default(uuid()) @db.Uuid
+  code                String      @unique /// GP-YYYYMMDD-NNNN
+  type                VisitType
+  status              VisitStatus
+  visitorId           String      @db.Uuid
+  hostId              String      @db.Uuid
+  createdById         String      @db.Uuid
+  purpose             Purpose
+  purposeNote         String?
+  notes               String?
+  visitDate           DateTime    @db.Date /// IST calendar date
+  expectedArrival     DateTime /// UTC instant
+  expectedDurationMin Int
+
+  // approval (unplanned)
+  approvalRequestedAt DateTime?
+  escalatedAt         DateTime?
+  decidedById         String?   @db.Uuid
+  decidedAt           DateTime?
+  rejectionReason     String?
+
+  // gate
+  checkedInAt          DateTime?
+  checkedInById        String?   @db.Uuid
+  visitorPhotoKey      String?
+  idPhotoKey           String?
+  photosPurgedAt       DateTime?
+  meetingOverAt        DateTime?
+  meetingOverById      String?   @db.Uuid
+  checkedOutAt         DateTime?
+  checkedOutById       String?   @db.Uuid
+  forcedCheckoutReason String?
+  cancelledAt          DateTime?
+  cancelReason         String?
+
+  version   Int      @default(0) /// optimistic locking
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  visitor   Visitor       @relation(fields: [visitorId], references: [id])
+  host      User          @relation("VisitHost", fields: [hostId], references: [id])
+  createdBy User          @relation("VisitCreatedBy", fields: [createdById], references: [id])
+  events    VisitEvent[]
+  uploads   MediaUpload[]
+
+  @@index([visitDate, status])
+  @@index([hostId, visitDate])
+  @@index([status, approvalRequestedAt])
+}
+
+/// Per-IST-day sequence for visit codes (atomic upsert-increment).
+model VisitCodeCounter {
+  date String @id /// YYYY-MM-DD
+  last Int    @default(0)
+}
+
+/// Immutable audit trail of visit changes.
+model VisitEvent {
+  id         String       @id @default(uuid()) @db.Uuid
+  visitId    String       @db.Uuid
+  action     String /// CREATED, EDITED, APPROVED, ESCALATED, PHOTO_VIEWED ...
+  fromStatus VisitStatus?
+  toStatus   VisitStatus?
+  actorId    String?      @db.Uuid /// null = system job
+  note       String?
+  data       Json? /// e.g. edit diff
+  createdAt  DateTime     @default(now())
+
+  visit Visit @relation(fields: [visitId], references: [id], onDelete: Cascade)
+
+  @@index([visitId, createdAt])
+}
+
+model MediaUpload {
+  id         String    @id @default(uuid()) @db.Uuid
+  key        String    @unique
+  kind       MediaKind
+  uploaderId String    @db.Uuid
+  visitId    String?   @db.Uuid /// set when linked at check-in
+  createdAt  DateTime  @default(now())
+  linkedAt   DateTime?
+
+  visit Visit? @relation(fields: [visitId], references: [id])
+
+  @@index([visitId])
+  @@index([linkedAt, createdAt])
+}
+
+model EmailOutbox {
+  id         String      @id @default(uuid()) @db.Uuid
+  dedupeKey  String      @unique /// visitId:template:recipient (NT-6)
+  to         String
+  template   String
+  payload    Json
+  status     EmailStatus @default(PENDING)
+  attempts   Int         @default(0)
+  lastError  String?
+  sendAfter  DateTime    @default(now())
+  sentAt     DateTime?
+  createdAt  DateTime    @default(now())
+
+  @@index([status, sendAfter])
+}
+
+model AppSetting {
+  key         String   @id
+  value       Json
+  updatedById String?  @db.Uuid
+  updatedAt   DateTime @updatedAt
+}
+
+/// Non-visit audit trail: user/role changes, settings changes, exports.
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  actorId   String?  @db.Uuid
+  action    String
+  entity    String
+  entityId  String?
+  data      Json?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+}
