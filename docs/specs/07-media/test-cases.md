@@ -1,6 +1,6 @@
 # Test Cases — 07 Media (Visitor & ID Photos)
 
-Fixtures and conventions: [../TESTING.md](../TESTING.md). Integration tests run MinIO in Testcontainers.
+Fixtures and conventions: [../TESTING.md](../TESTING.md). Integration tests run an S3-compatible emulator, chosen in Phase 3 (MinIO no longer publishes images or binaries).
 
 ## TDD Order
 1. Key generation, magic bytes, access policy, retention selection (MD-U-*)
@@ -32,7 +32,7 @@ Fixtures and conventions: [../TESTING.md](../TESTING.md). Integration tests run 
 | MD-I-11 | P0 | Purged visit | GET photo | 410 `PHOTO_PURGED` |
 | MD-I-12 | P1 | Storage delete throws for one object | Retention job | That visit keeps its keys (retried next run); others purged; job does not crash |
 | MD-I-13 | P1 | Unlinked uploads 25 h and 23 h old | Orphan job | 25 h one deleted (object + row); 23 h kept |
-| MD-I-14 | P0 | Any object key | Unsigned `GET http://minio/bucket/key` | 403 |
+| MD-I-14 | P0 | Any object key | Unsigned `GET` of the object URL on the storage endpoint | 403 |
 | MD-I-15 | P2 | Prod bucket config (Terraform plan test) | Inspect | Block public access on; SSE enabled |
 
 ## Traceability

@@ -6,7 +6,7 @@ Store check-in photos securely, serve them only to authorized roles, and purge t
 ## Functional Requirements
 | ID | Requirement |
 |---|---|
-| MD-1 | Private bucket (S3 in prod, MinIO locally). Keys: `visits/{yyyy}/{mm}/{uuid}.jpg`. No public ACLs. Server-side encryption on. |
+| MD-1 | Private bucket (S3 in prod; S3-compatible emulator locally, chosen in Phase 3). Keys: `visits/{yyyy}/{mm}/{uuid}.jpg`. No public ACLs. Server-side encryption on. |
 | MD-2 | Upload: the client requests `POST /media/upload-url {kind: VISITOR_PHOTO\|ID_PHOTO, contentType}` → **presigned POST** (5 min, policy `content-length-range` ≤ 2 MB, image/jpeg\|png\|webp). A presigned PUT cannot enforce size. The server records a pending upload (key, kind, uploaderId). |
 | MD-3 | On check-in, the API verifies each key: it exists, was uploaded by the same user, its kind matches, it was uploaded < 30 min ago, and the content is a real image (magic-byte check). Then it is linked to the visit. |
 | MD-4 | View: `GET /visits/:id/photos/:kind` → 302 to a presigned GET URL (60 s). Authorization: VISITOR_PHOTO → host, Security (today's visits), Admin. ID_PHOTO → Security (today's visits), Admin only. ID views are audited. A purged photo returns 410 `PHOTO_PURGED`. |

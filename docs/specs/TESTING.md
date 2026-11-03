@@ -16,7 +16,7 @@ Every module folder has a `specs.md` (what to build) and a `test-cases.md` (how 
 | Module | Prefix | | Layer | Code | Tool |
 |---|---|---|---|---|---|
 | 00 Architecture / state machine | SM | | Unit | U | Jest (api), Vitest (web/shared) |
-| 01 Auth & users | AU | | Integration (API + real DB) | I | Jest + Supertest + Testcontainers (Postgres, MinIO), MailHog |
+| 01 Auth & users | AU | | Integration (API + real DB) | I | Jest + Supertest + Postgres (Testcontainers or embedded), S3 emulator (Phase 3), MailHog |
 | 02 Planned visits | PV | | Component (UI) | C | Vitest + React Testing Library + MSW |
 | 03 Unplanned & approvals | UV | | Performance | P | k6, Lighthouse |
 | 04 Gate operations | GO | | End-to-end | E | Playwright for Java + TestNG + Page Object Model + Allure (separate Maven project `e2e/`) |

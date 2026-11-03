@@ -11,7 +11,7 @@
         ┌────────┬───────┼──────────┬──────────────┐
      auth-users visits unplanned  gate-ops  media  notifications  admin-reports
         │                                     │           │
-   PostgreSQL (Prisma)              S3 / MinIO (photos)  SMTP / SES (email)
+   PostgreSQL (Prisma)              S3 / local S3 emulator (photos)  SMTP / SES (email)
         │
    Job scheduler (@nestjs/schedule): approval escalation, email outbox, photo purge
 ```
@@ -21,7 +21,7 @@
 apps/web        React + Vite + TS, React Router, TanStack Query, React Hook Form + Zod, Tailwind (Coditas brand)
 apps/api        NestJS, Prisma, email one-time-code auth + JWT cookies, Zod validation
 packages/shared Zod schemas, enums (VisitStatus, Role, Purpose), API types shared by web and api
-infra/          docker-compose (postgres, minio, mailhog), Dockerfiles, CI workflows
+infra/          docker-compose (postgres, mailhog; S3 emulator from Phase 3), Dockerfiles, CI workflows
 docs/           requirements, plan, specs
 ```
 
@@ -143,4 +143,4 @@ The full TDD suite is in [test-cases.md](test-cases.md).
 - AC-ARCH-1: An illegal transition (e.g., CHECKED_OUT → CHECKED_IN) returns 409 and writes no event.
 - AC-ARCH-2: Two concurrent approve/reject calls produce exactly one decision; the other gets 409.
 - AC-ARCH-3: Every successful transition has exactly one matching `VisitEvent`.
-- AC-ARCH-4: `docker compose up` starts the full local stack (db, minio, mailhog, api, web).
+- AC-ARCH-4: `docker compose up` starts the full local stack (db, mailhog, api, web; S3 emulator from Phase 3).

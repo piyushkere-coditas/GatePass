@@ -28,7 +28,7 @@ cp .env.example .env && cp .env.example apps/api/.env
 
 # database — pick one
 pnpm db:dev                                                   # no Docker: embedded Postgres 16 on :5432 (keep running)
-docker compose up -d postgres minio minio-init mailhog        # with Docker
+docker compose up -d postgres mailhog                         # with Docker
 
 pnpm --filter @gatepass/api exec prisma migrate deploy
 pnpm --filter @gatepass/api db:seed
