@@ -41,7 +41,8 @@ export async function createTestApp(
     .useValue(mailer)
     .compile();
   const app = configureApp(moduleRef.createNestApplication({ bufferLogs: true }));
-  await app.init();
+  // Listening (not just init) lets supertest reuse one server, so requests may overlap safely.
+  await app.listen(0, '127.0.0.1');
   return {
     app,
     prisma: app.get(PrismaService),

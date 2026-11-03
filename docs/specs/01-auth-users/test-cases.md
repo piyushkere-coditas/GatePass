@@ -55,7 +55,7 @@ Fixtures and conventions: [../TESTING.md](../TESTING.md). Sign-in is by **email 
 | AU-I-09 | P0 | Access token expired (clock + 16 min) | `GET /me` → 401; `POST /auth/refresh` | Refresh 200 with new cookies; `/me` now 200 |
 | AU-I-10 | P1 | Refresh token older than 8 h | refresh | 401 |
 | AU-I-11 | P0 | Old refresh token reused after rotation | refresh | 401; all tokens of that family revoked |
-| AU-I-12 | P0 | guard1 logged in; guard1 deactivated (DB now; via `PATCH /admin/users` once slice 4 lands) | guard1 `GET /me` (`/gate/today` added in Phase 3) | 401 on the very next request; refresh also 401 |
+| AU-I-12 | P0 | guard1 logged in; guard1 deactivated (directly in the DB; the admin-API path is covered by AU-I-19) | guard1 `GET /me` (`/gate/today` added in Phase 3) | 401 on the very next request; refresh also 401 |
 | AU-I-13 | P0 | bob (EMPLOYEE) logged in; bob changed → SECURITY | bob `GET /me` (later also `GET /gate/today` / `POST /visits` → 200 / 403) | New role on the very next request, without re-login |
 | AU-I-14 | P0 | guard1 logged in, a visit CHECKED_IN | `POST /auth/logout` | Cookies cleared; refresh family revoked; `/me` 401; visit still CHECKED_IN (Q5) |
 | AU-I-32 | P1 | alice logged in | `PATCH /me {name:"Alice H."}` / `{name:"A"}` | 200 updated / 400 |
@@ -63,19 +63,19 @@ Fixtures and conventions: [../TESTING.md](../TESTING.md). Sign-in is by **email 
 ## Integration — Directory & Admin User Management
 | ID | Pri | Given | When | Then |
 |---|---|---|---|---|
-| AU-I-15 | P0 | 15 employees named "Pi…", eve inactive, guards | guard1 `GET /users/search?q=pi` | ≤ 10 results, case-insensitive name/email prefix, no SECURITY, no inactive |
+| AU-I-15 | P0 | 15 employees named "Pi…", eve inactive, guards | guard1 `GET /users/search?q=pi` | ≤ 10 results, case-insensitive match on the start of any word of the name or the start of the email (`ker` finds "Piyush Kere", `yus` doesn't), no SECURITY, no inactive |
 | AU-I-16 | P1 | — | `q=p` | 400 `QUERY_TOO_SHORT` |
 | AU-I-17 | P0 | alice | `GET /users/search?q=bo` | 403 |
 | AU-I-18 | P0 | carol | `POST /admin/users {email:"guard3@coditas.com", name:"Guard Three", role:"SECURITY"}` | 201, lastLoginAt null, createdById carol, audit row; again → 409 `USER_EXISTS`; `x@gmail.com` → 400 `DOMAIN_NOT_ALLOWED` |
-| AU-I-19 | P0 | carol | `PATCH /admin/users/alice {role:"ADMIN"}`, then back to EMPLOYEE | 200 each; audit rows with old/new role |
+| AU-I-19 | P0 | carol | `PATCH /admin/users/alice {role:"ADMIN"}`, then back to EMPLOYEE; `PATCH bob {isActive:false}` | 200 each; audit rows `{before:{role}, after:{role}}`; bob's next request → 401 |
 | AU-I-20 | P0 | carol is the only admin | `PATCH carol {role:"EMPLOYEE"}` / `{isActive:false}` | 422 `LAST_ADMIN` / 422 `SELF_DEACTIVATION` |
 | AU-I-22 | P1 | 30 users | `GET /admin/users?role=SECURITY&active=true&page=1` | Only active guards; pagination metadata; pre-registered users flagged `notSignedInYet:true` |
-| AU-I-23 | P1 | guard1 (SECURITY) | `POST /visits` (create planned visit) | 403 (security cannot host) |
+| AU-I-23 | P1 | guard1 (SECURITY) | `POST /visits` (create planned visit) | 403 (security cannot host). **Written in Phase 2** with `POST /visits`; also a row in the AU-I-21 matrix |
 
 ## Integration — Role Matrix (shared, parametrized)
 | ID | Pri | Given | When | Then |
 |---|---|---|---|---|
-| AU-I-21 | P0 | Table of every endpoint × {anonymous, EMPLOYEE, SECURITY, ADMIN} → expected status | Call each | Status matches the table. Anonymous → 401 everywhere except `/auth/*` and `/health`. **Every new endpoint must be added here.** |
+| AU-I-21 | P0 | Table of every endpoint × {anonymous, EMPLOYEE, SECURITY, ADMIN} → expected status | Call each | Status matches the table. Anonymous → 401 everywhere except `/auth/*` and `/health`. **Every new endpoint must be added to `apps/api/src/auth/role-matrix.int-spec.ts`.** |
 
 ## Component (UI)
 | ID | Pri | Given | When | Then |

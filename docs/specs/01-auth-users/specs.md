@@ -24,7 +24,7 @@ No Google/OAuth dependency and no passwords. Owning the `@coditas.com` mailbox i
 | AU-8 | The first admin is seeded from env `BOOTSTRAP_ADMIN_EMAIL` = **piyush.kere@coditas.com**. |
 | AU-9 | Logout clears the session only. It never changes any visit status (Q5). |
 | AU-10 | SECURITY users cannot host visits. They are excluded from the host directory and cannot create planned visits. |
-| AU-11 | Employee directory search (used for the unplanned-visit host picker): name/email prefix search over active EMPLOYEE/ADMIN users. |
+| AU-11 | Employee directory search (used for the unplanned-visit host picker): case-insensitive match on the start of any word of the name or the start of the email, over active EMPLOYEE/ADMIN users, max 10, sorted by name. |
 | AU-12 | The gate UI shows the signed-in guard's name and a prominent **Log out / Switch guard** button for shift changes on the shared tablet. |
 | AU-13 | A test-only login endpoint `POST /__test/login {email}` (sets session cookies) exists for automated tests. It is **not registered** unless `NODE_ENV=test`. |
 | AU-14 | **Code rules:** 6 digits from a cryptographically secure RNG; stored only as an HMAC-SHA256 hash (secret `OTP_SECRET`); expires 10 min after issue; single use; max **5** wrong attempts per code, after which the code is invalidated; requesting a new code invalidates any earlier unused code for that email. |
@@ -42,7 +42,7 @@ No Google/OAuth dependency and no passwords. Owning the `@coditas.com` mailbox i
 | GET | /me | any | `{id, name, email, role}` |
 | PATCH | /me | any | `{name}` (2–100 chars) |
 | GET | /users/search?q= | SECURITY, ADMIN | Max 10 results, q ≥ 2 chars |
-| GET | /admin/users?role=&active=&q=&page= | ADMIN | Paginated |
+| GET | /admin/users?role=&active=&q=&page= | ADMIN | 20 per page: `{items, page, pageSize, total}`; each item has `notSignedInYet` |
 | POST | /admin/users | ADMIN | Pre-register `{email, name, role}` |
 | PATCH | /admin/users/:id | ADMIN | `{name?, role?, isActive?}` |
 
