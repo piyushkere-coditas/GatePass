@@ -13,6 +13,7 @@ jobs:
   verify:
     name: Lint, typecheck, unit tests, build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -34,6 +35,7 @@ jobs:
   integration:
     name: Integration tests (embedded Postgres)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: verify
     steps:
       - uses: actions/checkout@v4

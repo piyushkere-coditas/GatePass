@@ -22,7 +22,7 @@ No emails are sent to visitors in v1. Emails never contain photos.
 |---|---|
 | NT-1 | Domain events are written to `EmailOutbox` **in the same DB transaction** as the state change (transactional outbox). |
 | NT-2 | The outbox worker runs every 15 s, sends via SMTP (SES in prod, MailHog locally), and retries with exponential backoff (max 5 attempts) before FAILED. |
-| NT-3 | Templates use MJML/Handlebars with Coditas branding and a plain-text alternative. Times are shown in IST. |
+| NT-3 | Templates are typed TypeScript functions with an auto-escaping `html` helper, a shared Coditas-branded layout and a plain-text alternative. Times are shown in IST (`formatIstDateTime`). |
 | NT-4 | Links point to `APP_BASE_URL`. No action tokens in emails (approval requires login). |
 | NT-5 | Admins can see FAILED emails in the admin panel and retry them. |
 | NT-6 | Each email is idempotent per (visitId, template, recipient). Duplicates are not enqueued twice. Login-code emails use the LoginCode id as the dedupe key. |

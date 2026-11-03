@@ -47,18 +47,18 @@ enum MediaKind {
 
 enum EmailStatus {
   PENDING
+  SENDING
   SENT
   FAILED
 }
 
-/// Everyone signs in with Google Workspace; no local passwords.
+/// Everyone signs in with an email one-time code; no passwords.
 model User {
   id          String    @id @default(uuid()) @db.Uuid
   email       String    @unique /// lower-cased @coditas.com
   name        String
   role        Role      @default(EMPLOYEE)
   isActive    Boolean   @default(true)
-  googleSub   String?   @unique
   lastLoginAt DateTime? /// null = pre-registered, not yet signed in
   createdById String?   @db.Uuid
   createdAt   DateTime  @default(now())
@@ -83,6 +83,22 @@ model RefreshToken {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([familyId])
+}
+
+/// Email one-time sign-in codes (spec 01, AU-14). Only a keyed hash of the code is stored.
+model LoginCode {
+  id            String    @id @default(uuid()) @db.Uuid
+  email         String /// lower-cased
+  codeHash      String
+  expiresAt     DateTime
+  attempts      Int       @default(0)
+  consumedAt    DateTime?
+  invalidatedAt DateTime?
+  requestIp     String?
+  createdAt     DateTime  @default(now())
+
+  @@index([email, createdAt])
+  @@index([requestIp, createdAt])
 }
 
 /// Reused across visits for returning-visitor autofill.
@@ -188,19 +204,21 @@ model MediaUpload {
 }
 
 model EmailOutbox {
-  id         String      @id @default(uuid()) @db.Uuid
-  dedupeKey  String      @unique /// visitId:template:recipient (NT-6)
-  to         String
-  template   String
-  payload    Json
-  status     EmailStatus @default(PENDING)
-  attempts   Int         @default(0)
-  lastError  String?
-  sendAfter  DateTime    @default(now())
-  sentAt     DateTime?
-  createdAt  DateTime    @default(now())
+  id        String      @id @default(uuid()) @db.Uuid
+  dedupeKey String      @unique /// visitId:template:recipient, or loginCodeId for login codes (NT-6)
+  to        String
+  template  String
+  payload   Json
+  priority  Int         @default(0) /// higher is sent first; login codes are priority (NT-7)
+  status    EmailStatus @default(PENDING)
+  attempts  Int         @default(0)
+  lastError String?
+  sendAfter DateTime    @default(now())
+  lockedAt  DateTime? /// set while a worker is sending (status SENDING)
+  sentAt    DateTime?
+  createdAt DateTime    @default(now())
 
-  @@index([status, sendAfter])
+  @@index([status, sendAfter, priority])
 }
 
 model AppSetting {

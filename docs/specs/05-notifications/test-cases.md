@@ -45,13 +45,14 @@ Fixtures and conventions: [../TESTING.md](../TESTING.md). Integration tests use 
 | NT-I-10 | P1 | FAILED row | carol `GET /admin/emails?status=FAILED` then `POST /admin/emails/:id/retry`; alice same | carol: listed, then PENDING with attempts=0; alice: 403 |
 | NT-I-11 | P0 | Worker idle (next tick 15 s away) | Enqueue a `login-code` item | Delivered to MailHog within 2 s without waiting for the tick; after SENT the row's `payload` has no `code` |
 | NT-I-12 | P1 | `login-code` and 10 visit emails PENDING | Worker run | `login-code` is sent first |
+| NT-I-13 | P1 | One row SENDING with `lockedAt` 5 min + 1 ms ago (crashed worker), another locked 1 min ago | Worker run | Only the stale one is re-claimed and sent |
 
 ## Traceability
 | Req | Tests |
 |---|---|
 | Events → emails table | NT-U-01, NT-I-01, NT-I-09 |
 | NT-1 transactional outbox | NT-I-02 |
-| NT-2 worker & backoff | NT-U-06, NT-I-04..08 |
+| NT-2 worker & backoff | NT-U-06, NT-I-04..08, NT-I-13 |
 | NT-3 templates, IST | NT-U-02, NT-U-03, NT-U-05 |
 | NT-4 links, no tokens | NT-U-04 |
 | NT-5 admin retry | NT-I-10, AD-C-06 |
