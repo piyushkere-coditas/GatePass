@@ -1,4 +1,4 @@
-/** Integration tests against a real Postgres 16: Testcontainers when Docker is available, else embedded (INT_DB=docker|embedded). */
+/** Integration tests against a real Postgres 16 running as an embedded process (no Docker). */
 const unit = require('./jest.config');
 
 module.exports = {

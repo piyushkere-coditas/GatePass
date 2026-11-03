@@ -65,7 +65,7 @@ Fixtures and conventions: [../TESTING.md](../TESTING.md). Write these **first**.
 | SM-I-11 | P0 | Log capture on | Create visit with phone +919876543210 | Phone number and photo keys do not appear in logs; request id present |
 | SM-I-12 | P1 | Unknown route / malformed UUID | GET | 404 `NOT_FOUND` / 400 `VALIDATION_FAILED` |
 | SM-I-13 | P0 | App booted with `NODE_ENV=production` | `POST /__test/login`, `/__test/clock`, `/__test/jobs/escalation` | 404 for all (test routes not registered) |
-| SM-I-14 | P1 | CI | `docker compose up` smoke script | web 200, api `/health` 200 within 90 s |
+| SM-I-14 | P1 | Phase 6: deployment images built from `infra/docker` | Start api + web images against a Postgres | web 200, api `/health` 200 within 90 s (moved from Phase 0: no Docker locally) |
 
 ## Traceability
 | Requirement / AC | Tests |
@@ -74,6 +74,6 @@ Fixtures and conventions: [../TESTING.md](../TESTING.md). Write these **first**.
 | AC-ARCH-1 illegal transition | SM-U-14, SM-U-15, SM-I-05 |
 | AC-ARCH-2 concurrency | SM-I-02, SM-I-03 |
 | AC-ARCH-3 one event per transition | SM-I-01, SM-I-04 |
-| AC-ARCH-4 docker compose | SM-I-14 |
+| AC-ARCH-4 local stack without Docker; deployment images (Phase 6) | SM-I-01..13, SM-I-14 |
 | Cross-cutting (errors, CORS, logging, timezone) | SM-U-19..22, SM-I-07..13 |
 | Shared table/enums stay correct and in sync | SM-U-28, SM-U-29 |

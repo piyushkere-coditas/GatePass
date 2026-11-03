@@ -22,14 +22,14 @@ For every story: take the test IDs from the module's **Traceability** table → 
 
 ### Phase 0 — Foundation
 - Monorepo (pnpm), `apps/web`, `apps/api`, `packages/shared`; ESLint/Prettier, Husky, commitlint.
-- docker-compose: Postgres 16, MailHog (photo-storage emulator added in Phase 3).
+- Local stack without Docker: embedded Postgres (`pnpm db:dev`, integration tests start their own).
 - Prisma schema + first migration (spec 00), seed script (bootstrap admin, sample employees, a security user, sample visits).
 - `VisitStateService` + transition table + unit tests (the core of the system).
-- CI: lint → typecheck → unit → integration (Testcontainers Postgres) → build images.
-- **Exit:** all `SM-*` tests green (00-architecture/test-cases.md). `docker compose up` gives a running web + API + DB.
+- CI: lint → typecheck → unit → integration (embedded Postgres) → build.
+- **Exit:** all `SM-*` tests green (00-architecture/test-cases.md). App runs locally without Docker (verified: migrate, seed, `/health` 200).
 
 ### Phase 1 — Auth & Users (spec 01) + Email outbox core (spec 05 NT-1/2/7)
-- Email outbox + worker (SMTP; MailHog locally — Docker image or the standalone Windows `MailHog.exe`, no admin needed), priority sending and payload scrubbing, `login-code` template.
+- Email outbox + worker (SMTP; in-process SMTP server in tests, standalone `MailHog.exe` for manual local use — no Docker, no admin), priority sending and payload scrubbing, `login-code` template.
 - Email one-time-code sign-in for all roles (coditas.com only, hashed codes, expiry, attempt and rate limits), JIT provisioning, admin pre-registration of guards, JWT cookies, refresh rotation, per-request role/active check.
 - Role guards, `/me`, route protection in the SPA, two-step login screen, role-based landing, gate "Switch guard".
 - Admin user management screens. Bootstrap admin piyush.kere@coditas.com.
@@ -43,7 +43,7 @@ For every story: take the test IDs from the module's **Traceability** table → 
 - **Exit:** all `PV-*` tests plus NT-U-01, NT-U-07 and NT-I-01..02 green. E2E-06 green.
 
 ### Phase 3 — Media + Gate Operations (specs 07, 04)
-- Pick and wire a local S3-compatible emulator (MinIO no longer publishes images/binaries; candidates: SeaweedFS, Garage, LocalStack, or an in-process S3 mock for tests) for docker-compose, integration tests and no-Docker dev.
+- Pick and wire a local S3-compatible emulator (MinIO no longer publishes images/binaries; candidates: SeaweedFS, Garage, LocalStack, or an in-process S3 mock for tests) for integration tests and local dev, **without Docker**.
 - Presigned uploads, verification, signed viewing, authorization.
 - Gate dashboard (tablet-first), check-in wizard with camera + compression, check-out/force check-out.
 - Socket.IO live refresh with polling fallback.
@@ -67,6 +67,7 @@ For every story: take the test IDs from the module's **Traceability** table → 
 - Security review (OWASP ASVS L2 checklist), dependency scan, pen-test of the upload and auth flows.
 - Load test: 200 concurrent users, 1,000 visits/day (k6).
 - Accessibility audit (axe) on the employee portal.
+- Deployment images: build `infra/docker` api/web images in CI and smoke-test them against a Postgres (SM-I-14); first point where Docker is needed.
 - Infra: AWS ECS Fargate + RDS Postgres + S3 + SES, IaC (Terraform), staging + prod, backups, alerts.
 - UAT with Facilities and the security team at Nyati, guard training, paper fallback SOP.
 - **Exit:** UAT sign-off, go-live.
@@ -75,7 +76,7 @@ For every story: take the test IDs from the module's **Traceability** table → 
 | Level | Tool | Scope |
 |---|---|---|
 | Unit | Jest (api), Vitest + RTL (web) | State machine, validators, services, components |
-| Integration | Jest + Supertest + Postgres (Testcontainers or embedded), S3 emulator from Phase 3 | Every API endpoint plus role matrix |
+| Integration | Jest + Supertest + embedded Postgres, in-process SMTP, S3 emulator from Phase 3 | Every API endpoint plus role matrix |
 | Component | Vitest + React Testing Library + MSW | Forms, gate wizard, role routing |
 | E2E | Playwright for Java + TestNG + Page Object Model, Allure reports (`e2e/` Maven project) | 13 journeys in 08-e2e, tablet + phone viewports |
 | Non-functional | k6, axe, OWASP ZAP | Performance, a11y, security |
@@ -95,5 +96,5 @@ Story's test IDs written first (red), then green · API documented in OpenAPI (S
 | Privacy complaints over ID photos | ID photo only (no numbers), restricted access, audited views, retention purge, consent notice at the gate |
 | Guards' `@coditas.com` mailboxes not ready, or guards can't read email on duty (Q11) | IT creates guard mailboxes in Phase 1; confirm access on the gate tablet/phone during UAT. Fallback if needed: admin-issued one-time code |
 | Login emails delayed or landing in spam | Priority sending (NT-7), SPF/DKIM for the SES sender domain, plain-text code in the subject so it shows in notifications |
-| MinIO images and binaries discontinued (found in CI, 2026-11-03) | Removed from docker-compose in Phase 0; choose an S3-compatible emulator at the start of Phase 3. Production is unaffected (AWS S3) |
+| MinIO images and binaries discontinued (found in CI, 2026-11-03) | Not used in Phase 0; choose an S3-compatible emulator at the start of Phase 3. Production is unaffected (AWS S3) |
 | Shared gate tablet left logged in across shifts | 8 h session cap, visible guard name, "Switch guard" button that returns to an empty login form |

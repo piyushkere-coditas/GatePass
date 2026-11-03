@@ -3,7 +3,7 @@
 Fixtures, conventions and the `e2e/` project layout: [../TESTING.md](../TESTING.md).
 
 **Setup:**
-- **Stack:** the full stack runs via docker-compose (test profile). Each test class resets and seeds data through `TestApi` in `@BeforeClass`.
+- **Stack:** the app runs locally without Docker: embedded Postgres (`pnpm db:dev`), the API with `NODE_ENV=test`, the web app, and MailHog (standalone binary) for emails. Each test class resets and seeds data through `TestApi` in `@BeforeClass`.
 - **Login:** every role (employee, guard, admin) logs in through `TestApi.loginAs(email)`, which calls `POST /__test/login` and loads the cookies into the Playwright `BrowserContext`. Each actor gets its own context, so alice and guard1 run side by side in one test.
 - **Camera:** Chromium is launched with `--use-fake-ui-for-media-stream --use-fake-device-for-media-stream`.
 - **Emails:** asserted through `MailHogClient`.

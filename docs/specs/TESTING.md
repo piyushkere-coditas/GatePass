@@ -16,7 +16,7 @@ Every module folder has a `specs.md` (what to build) and a `test-cases.md` (how 
 | Module | Prefix | | Layer | Code | Tool |
 |---|---|---|---|---|---|
 | 00 Architecture / state machine | SM | | Unit | U | Jest (api), Vitest (web/shared) |
-| 01 Auth & users | AU | | Integration (API + real DB) | I | Jest + Supertest + Postgres (Testcontainers or embedded), S3 emulator (Phase 3), MailHog |
+| 01 Auth & users | AU | | Integration (API + real DB) | I | Jest + Supertest + embedded Postgres 16, in-process SMTP server, S3 emulator (Phase 3) |
 | 02 Planned visits | PV | | Component (UI) | C | Vitest + React Testing Library + MSW |
 | 03 Unplanned & approvals | UV | | Performance | P | k6, Lighthouse |
 | 04 Gate operations | GO | | End-to-end | E | Playwright for Java + TestNG + Page Object Model + Allure (separate Maven project `e2e/`) |
@@ -88,7 +88,7 @@ e2e/
 Run: `mvn test -Dsuite=smoke` / `-Dsuite=regression`, then `allure serve target/allure-results`. CI publishes the Allure report as a build artifact.
 
 ## 4. Rules
-- Integration tests hit a real Postgres 16 and are isolated by truncation per test. `INT_DB=docker` uses Testcontainers (CI default); `INT_DB=embedded` runs Postgres as a plain process via `embedded-postgres` (no Docker or admin rights). Without `INT_DB`, Docker is used when reachable, otherwise embedded.
+- Integration tests hit a real Postgres 16 (started by the test run via `embedded-postgres`; no Docker or admin rights) and are isolated by truncation per test. Same setup locally and in CI.
 - No test depends on another test's data.
 - Every API error test asserts **status code + error `code`**, not only the status.
 - Every state-changing test also asserts the `VisitEvent` row and, where relevant, the `EmailOutbox` row.

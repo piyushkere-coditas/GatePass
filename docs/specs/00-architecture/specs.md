@@ -21,7 +21,7 @@
 apps/web        React + Vite + TS, React Router, TanStack Query, React Hook Form + Zod, Tailwind (Coditas brand)
 apps/api        NestJS, Prisma, email one-time-code auth + JWT cookies, Zod validation
 packages/shared Zod schemas, enums (VisitStatus, Role, Purpose), API types shared by web and api
-infra/          docker-compose (postgres, mailhog; S3 emulator from Phase 3), Dockerfiles, CI workflows
+infra/          Dockerfiles for the AWS deployment images (verified in Phase 6); no Docker for local dev/CI
 docs/           requirements, plan, specs
 ```
 
@@ -143,4 +143,4 @@ The full TDD suite is in [test-cases.md](test-cases.md).
 - AC-ARCH-1: An illegal transition (e.g., CHECKED_OUT → CHECKED_IN) returns 409 and writes no event.
 - AC-ARCH-2: Two concurrent approve/reject calls produce exactly one decision; the other gets 409.
 - AC-ARCH-3: Every successful transition has exactly one matching `VisitEvent`.
-- AC-ARCH-4: `docker compose up` starts the full local stack (db, mailhog, api, web; S3 emulator from Phase 3).
+- AC-ARCH-4: the app runs and is tested locally without Docker (embedded Postgres); deployment images are verified in Phase 6.

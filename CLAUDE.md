@@ -24,7 +24,7 @@ If code and specs disagree, raise it — don't silently diverge. When a spec gap
 ```bash
 pnpm test:unit                          # all unit/component tests
 pnpm --filter @gatepass/api test:cov    # API unit + coverage gates (state machine must stay 100%)
-pnpm --filter @gatepass/api test:int    # integration (real Postgres: Docker if available, else embedded)
+pnpm --filter @gatepass/api test:int    # integration (real Postgres 16, embedded — no Docker)
 pnpm lint && pnpm format:check && pnpm typecheck
 pnpm db:dev                             # local Postgres without Docker (port 5432)
 ```
@@ -47,6 +47,6 @@ Everyone (employees, security guards, admins) signs in with an **email one-time 
 
 ## Environment notes
 
-- Windows dev machine without Docker: use `pnpm db:dev` and embedded Postgres for integration tests. `scripts/smoke.sh` (SM-I-14) needs Docker and runs in CI.
+- No Docker for local dev, tests or CI: `pnpm db:dev` runs embedded Postgres; integration tests start their own. `infra/docker/*` exists only for the AWS deployment images (verified in Phase 6).
 - E2E tests (Phase 1+): separate Maven project `e2e/` — Playwright Java + TestNG + Page Object Model + Allure.
 - Commits follow Conventional Commits (commitlint); pre-commit runs lint-staged.

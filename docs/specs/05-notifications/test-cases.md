@@ -1,6 +1,6 @@
 # Test Cases — 05 Notifications (Email)
 
-Fixtures and conventions: [../TESTING.md](../TESTING.md). Integration tests use MailHog (SMTP + HTTP API) in Testcontainers.
+Fixtures and conventions: [../TESTING.md](../TESTING.md). Integration tests use an in-process SMTP test server that captures messages (no Docker); E2E uses MailHog.
 
 ## TDD Order
 1. Event→template mapping, formatting, backoff (NT-U-*)

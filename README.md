@@ -13,22 +13,21 @@ Visitor management for the Nyati office: employees pre-register visitors, securi
 | `apps/api`        | NestJS API, Prisma (PostgreSQL)                                                   |
 | `apps/web`        | React + Vite SPA                                                                  |
 | `packages/shared` | Enums, validation, visit transition table, IST date helpers (used by api and web) |
-| `infra/docker`    | Dockerfiles and nginx config                                                      |
+| `infra/docker`    | Deployment images for AWS (Phase 6); not used for local dev                       |
 | `e2e/`            | Playwright Java + TestNG + Allure (added in Phase 1)                              |
 
 ## Prerequisites
 
-Node 22+ and pnpm 10. Docker (Docker Desktop or Rancher Desktop) is **optional**: without it, Postgres runs as an embedded process and integration tests use it automatically.
+Node 22+ and pnpm 10. **No Docker needed**: Postgres runs as an embedded process for development and tests.
 
 ## Getting started
 
 ```bash
 pnpm install
-cp .env.example .env && cp .env.example apps/api/.env
+cp .env.example apps/api/.env
 
-# database — pick one
-pnpm db:dev                                                   # no Docker: embedded Postgres 16 on :5432 (keep running)
-docker compose up -d postgres mailhog                         # with Docker
+# database
+pnpm db:dev                                     # embedded Postgres 16 on :5432 (keep it running)
 
 pnpm --filter @gatepass/api exec prisma migrate deploy
 pnpm --filter @gatepass/api db:seed
@@ -38,8 +37,6 @@ pnpm --filter @gatepass/api dev     # http://localhost:3000/health
 pnpm --filter @gatepass/web dev     # http://localhost:5173
 ```
 
-Full stack in containers: `docker compose up -d --build` → web on http://localhost:8080.
-
 ## Tests (TDD)
 
 Every test name starts with its ID from the module's `test-cases.md` (e.g. `[SM-U-03]`).
@@ -47,7 +44,6 @@ Every test name starts with its ID from the module's `test-cases.md` (e.g. `[SM-
 ```bash
 pnpm test:unit                          # all unit/component tests
 pnpm --filter @gatepass/api test:cov    # API unit tests with coverage gates
-pnpm --filter @gatepass/api test:int    # integration tests: Testcontainers if Docker is up, else embedded Postgres
-bash scripts/smoke.sh                   # docker compose smoke test (SM-I-14, needs Docker; runs in CI)
+pnpm --filter @gatepass/api test:int    # integration tests (starts its own embedded Postgres)
 pnpm lint && pnpm typecheck
 ```
