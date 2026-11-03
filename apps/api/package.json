@@ -14,7 +14,8 @@
     "db:dev": "node scripts/dev-db.mjs",
     "prisma:validate": "prisma validate",
     "prisma:migrate": "prisma migrate dev",
-    "db:seed": "ts-node prisma/seed.ts"
+    "db:seed": "ts-node prisma/seed.ts",
+    "mail:dev": "node scripts/dev-mail.mjs"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

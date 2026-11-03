@@ -32,10 +32,17 @@ pnpm db:dev                                     # embedded Postgres 16 on :5432 
 pnpm --filter @gatepass/api exec prisma migrate deploy
 pnpm --filter @gatepass/api db:seed
 
+# email: local mailbox (no Docker, no download) — sign-in codes arrive here
+pnpm mail:dev                                   # SMTP on :1025, inbox at http://localhost:8025
+
 # run the apps
 pnpm --filter @gatepass/api dev     # http://localhost:3000/health
 pnpm --filter @gatepass/web dev     # http://localhost:5173
 ```
+
+Sign in at http://localhost:5173 with any `@coditas.com` address and copy the 6-digit code from the inbox.
+The seed creates `piyush.kere@coditas.com` (admin), `alice@` / `bob@` (employees) and `guard1@` (security).
+Use Chrome, Edge or Firefox: session cookies are `Secure`, which these browsers allow on `http://localhost`.
 
 ## Tests (TDD)
 

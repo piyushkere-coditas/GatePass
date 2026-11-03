@@ -33,6 +33,8 @@ export default tseslint.config(
       '**/test/**',
       '**/clock.ts',
       '**/prisma/seed.ts',
+      // Local dev tooling (mailbox, embedded DB, E2E stack), never part of the deployed app.
+      'apps/api/scripts/**',
     ],
     rules: { 'no-restricted-syntax': 'off' },
   },

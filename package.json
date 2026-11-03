@@ -15,7 +15,8 @@
     "test:unit": "pnpm -r test:unit",
     "test:int": "pnpm -r --if-present test:int",
     "db:dev": "pnpm --filter @gatepass/api db:dev",
-    "prepare": "husky"
+    "prepare": "husky",
+    "mail:dev": "pnpm --filter @gatepass/api mail:dev"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.0",
