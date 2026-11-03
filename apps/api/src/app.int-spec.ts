@@ -15,6 +15,7 @@ import request from 'supertest';
 import { z } from 'zod';
 import { AppModule } from './app.module';
 import { configureApp } from './app.setup';
+import { Public } from './auth/guards/public.decorator';
 import { DomainError } from './common/domain-error';
 import { ZodValidationPipe } from './common/zod-validation.pipe';
 import { PrismaService } from './prisma/prisma.service';
@@ -28,6 +29,7 @@ const probeSchema = z.object({
 });
 
 /** Throwaway endpoints that exercise the cross-cutting HTTP behaviour before real features exist. */
+@Public()
 @Controller('probe')
 class ProbeController {
   @Post('transition')

@@ -1,10 +1,12 @@
 import { Controller, Get, HttpStatus, Res } from '@nestjs/common';
 import type { Response } from 'express';
+import { Public } from '../auth/guards/public.decorator';
 import { PrismaService } from '../prisma/prisma.service';
 
 type Status = 'up' | 'down';
 
 /** GET /health — public liveness/readiness. Storage check is added with the media module (Phase 3). */
+@Public()
 @Controller('health')
 export class HealthController {
   constructor(private readonly prisma: PrismaService) {}

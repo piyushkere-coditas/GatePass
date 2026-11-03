@@ -27,6 +27,9 @@ export default async function globalSetup() {
   const url = `postgresql://gatepass:gatepass@localhost:${port}/gatepass_test?schema=public`;
   process.env.DATABASE_URL = url;
   process.env.NODE_ENV = 'test';
+  // Production-mode apps in tests (SM-I-13, AU-I-24) require real-length secrets.
+  process.env.JWT_SECRET ??= 'integration-test-jwt-secret-0123456789abcdef';
+  process.env.OTP_SECRET ??= 'integration-test-otp-secret-0123456789abcdef';
   execSync('pnpm exec prisma migrate deploy', {
     env: { ...process.env, DATABASE_URL: url },
     stdio: 'inherit',

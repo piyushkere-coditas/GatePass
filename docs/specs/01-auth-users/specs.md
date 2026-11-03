@@ -18,8 +18,8 @@ No Google/OAuth dependency and no passwords. Owning the `@coditas.com` mailbox i
 | AU-2 | On first successful verification, an unknown `@coditas.com` user is auto-provisioned with role EMPLOYEE (JIT provisioning). Their name defaults to the email local part (`piyush.kere` → "Piyush Kere") and can be edited by the user or an admin. |
 | AU-3 | Admins can **pre-register** a user by email with a role (typically SECURITY for guards) and a display name before that person's first login. On first sign-in the pre-registered record is matched by email (case-insensitive). |
 | AU-4 | Admins can change any user's role (EMPLOYEE / SECURITY / ADMIN) and deactivate or reactivate users. The last active admin cannot be demoted or deactivated (`LAST_ADMIN`). An admin cannot deactivate themselves (`SELF_DEACTIVATION`). All changes are audited. |
-| AU-5 | Role and active status are checked on **every request** (user cache ≤ 30 s), so role changes and deactivation take effect without waiting for token expiry. |
-| AU-6 | Session: JWT access token (15 min) + refresh token (8 h = one shift, rotating with reuse detection) in httpOnly Secure SameSite=Lax cookies. |
+| AU-5 | Role and active status are checked on **every request**: the access token only identifies the session, and the user and session are re-read from the database each time (no cache), so role changes, deactivation and logout take effect immediately rather than at token expiry. |
+| AU-6 | Session: JWT access token (15 min, HS256, cookie `access`, path `/`) + refresh token (cookie `refresh`, path `/auth`, stored as SHA-256 hash) in httpOnly Secure SameSite=Lax cookies. The session lasts at most **8 h from sign-in** (one shift); each refresh rotates the token but keeps that expiry. Reusing a rotated token revokes the whole session. |
 | AU-7 | Deactivated users cannot sign in (no code is sent; verification fails), and their existing sessions are rejected. |
 | AU-8 | The first admin is seeded from env `BOOTSTRAP_ADMIN_EMAIL` = **piyush.kere@coditas.com**. |
 | AU-9 | Logout clears the session only. It never changes any visit status (Q5). |

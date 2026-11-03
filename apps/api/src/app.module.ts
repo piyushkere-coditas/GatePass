@@ -1,12 +1,14 @@
 import { type DynamicModule, Global, Module } from '@nestjs/common';
 import { LoggerModule } from 'nestjs-pino';
 import type { DestinationStream } from 'pino';
+import { AuthModule } from './auth/auth.module';
 import { AdjustableClock, Clock, SystemClock } from './common/clock';
 import { loggerParams } from './common/logging';
 import { HealthController } from './health/health.controller';
 import { NotificationsModule } from './notifications/notifications.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { TestSupportController } from './test-support/test-support.controller';
+import { UsersModule } from './users/users.module';
 import { VisitsModule } from './visits/visits.module';
 
 export interface AppOptions {
@@ -36,6 +38,8 @@ export class AppModule {
         ClockModule.forEnv(nodeEnv),
         PrismaModule,
         NotificationsModule.forEnv(nodeEnv),
+        AuthModule.forEnv(nodeEnv),
+        UsersModule,
         VisitsModule,
       ],
       // Test-only routes are not registered at all outside NODE_ENV=test.

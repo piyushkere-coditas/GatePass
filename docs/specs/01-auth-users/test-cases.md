@@ -31,13 +31,13 @@ Fixtures and conventions: [../TESTING.md](../TESTING.md). Sign-in is by **email 
 ## Integration — Request & Verify Code
 | ID | Pri | Given | When | Then |
 |---|---|---|---|---|
-| AU-I-01 | P0 | — | `POST /auth/otp/request {email:"alice@coditas.com"}` | 202 generic message; one `LoginCode` row with `codeHash` (no plain code column); outbox `login-code` to alice, sent immediately (MailHog receives within 2 s) |
+| AU-I-01 | P0 | — | `POST /auth/otp/request {email:"alice@coditas.com"}` | 202 generic message; one `LoginCode` row with `codeHash` (no plain code column); outbox `login-code` to alice, sent immediately (mailer receives it within 2 s; MailHog in E2E-07) |
 | AU-I-02 | P0 | New email dave@coditas.com | request → verify with emailed code | 200 `{role:"EMPLOYEE", name:"Dave"}`; user created; cookies `access`/`refresh` httpOnly, Secure, SameSite=Lax; code `consumedAt` set |
 | AU-I-03 | P1 | Existing carol (ADMIN) | request → verify | No duplicate user; role still ADMIN; lastLoginAt updated |
 | AU-I-04 | P0 | eve (inactive) | request | 202 (same body as active user); **no** email and no LoginCode row; verify with any code → 401 `INVALID_CODE` |
 | AU-I-05 | P0 | — | request with `x@gmail.com` / `x@coditas.com.evil.io` | 400 `DOMAIN_NOT_ALLOWED`; nothing stored or sent |
 | AU-I-06 | P1 | `BOOTSTRAP_ADMIN_EMAIL=carol@coditas.com`, empty DB | Run seed | carol exists as ADMIN; first sign-in keeps ADMIN |
-| AU-I-07 | P0 | carol pre-registered guard3@coditas.com as SECURITY, name "Guard Three" | guard3 request → verify | Same row (no duplicate): role SECURITY, name kept, lastLoginAt set |
+| AU-I-07 | P0 | guard3@coditas.com pre-registered as SECURITY, name "Guard Three" (DB row; admin API covered by AU-I-18) | guard3 request → verify | Same row (no duplicate): role SECURITY, name kept, lastLoginAt set |
 | AU-I-08 | P1 | Pre-registered `guard3@coditas.com` | Request/verify using `Guard3@Coditas.com` | Matched case-insensitively to the same user |
 | AU-I-25 | P0 | Valid code | verify with wrong code ×5, then the right code | First 5 → 401 `INVALID_CODE`; 6th (right code) → 401; `invalidatedAt` set |
 | AU-I-26 | P0 | Code issued at 10:00 | Clock 10:10:00 → verify | 401 `INVALID_CODE` |
@@ -47,6 +47,7 @@ Fixtures and conventions: [../TESTING.md](../TESTING.md). Sign-in is by **email 
 | AU-I-30 | P1 | 20 requests from one IP for different emails in 15 min | 21st | 429 |
 | AU-I-31 | P0 | Code sent | Inspect outbox row and captured logs | Outbox `payload.code` removed after SENT; the 6-digit code appears in no log line |
 | AU-I-24 | P0 | `NODE_ENV=production` | `POST /__test/login` | 404 (route not registered); see also SM-I-13 |
+| AU-I-21a | P0 | Anonymous | `GET /me`, `POST /auth/refresh`, `POST /auth/otp/request` | 401 / 401 / 202 (first rows of the AU-I-21 matrix; the full matrix comes with slice 4) |
 
 ## Integration — Sessions
 | ID | Pri | Given | When | Then |
@@ -54,8 +55,8 @@ Fixtures and conventions: [../TESTING.md](../TESTING.md). Sign-in is by **email 
 | AU-I-09 | P0 | Access token expired (clock + 16 min) | `GET /me` → 401; `POST /auth/refresh` | Refresh 200 with new cookies; `/me` now 200 |
 | AU-I-10 | P1 | Refresh token older than 8 h | refresh | 401 |
 | AU-I-11 | P0 | Old refresh token reused after rotation | refresh | 401; all tokens of that family revoked |
-| AU-I-12 | P0 | guard1 logged in; carol deactivates guard1 | guard1 `GET /gate/today` after cache TTL (≤ 30 s, fake clock) | 401; refresh also 401 |
-| AU-I-13 | P0 | bob (EMPLOYEE) logged in; carol changes bob → SECURITY | bob `GET /gate/today` / `POST /visits` after cache TTL | 200 / 403 (new role applied without re-login) |
+| AU-I-12 | P0 | guard1 logged in; guard1 deactivated (DB now; via `PATCH /admin/users` once slice 4 lands) | guard1 `GET /me` (`/gate/today` added in Phase 3) | 401 on the very next request; refresh also 401 |
+| AU-I-13 | P0 | bob (EMPLOYEE) logged in; bob changed → SECURITY | bob `GET /me` (later also `GET /gate/today` / `POST /visits` → 200 / 403) | New role on the very next request, without re-login |
 | AU-I-14 | P0 | guard1 logged in, a visit CHECKED_IN | `POST /auth/logout` | Cookies cleared; refresh family revoked; `/me` 401; visit still CHECKED_IN (Q5) |
 | AU-I-32 | P1 | alice logged in | `PATCH /me {name:"Alice H."}` / `{name:"A"}` | 200 updated / 400 |
 

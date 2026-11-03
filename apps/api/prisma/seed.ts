@@ -1,5 +1,6 @@
 import { formatVisitCode, toIstDate } from '@gatepass/shared';
 import { Prisma, PrismaClient, Purpose, Role, VisitStatus, VisitType } from '@prisma/client';
+import { ensureBootstrapAdmin } from '../src/users/bootstrap-admin';
 
 /**
  * Always: ensures the bootstrap admin exists (AU-8).
@@ -8,14 +9,10 @@ import { Prisma, PrismaClient, Purpose, Role, VisitStatus, VisitType } from '@pr
 const prisma = new PrismaClient();
 
 async function main(): Promise<void> {
-  const adminEmail = (process.env.BOOTSTRAP_ADMIN_EMAIL ?? '').trim().toLowerCase();
+  const adminEmail = (process.env.BOOTSTRAP_ADMIN_EMAIL ?? '').trim();
   if (!adminEmail) throw new Error('BOOTSTRAP_ADMIN_EMAIL is required');
-  await prisma.user.upsert({
-    where: { email: adminEmail },
-    update: { role: Role.ADMIN, isActive: true },
-    create: { email: adminEmail, name: adminEmail, role: Role.ADMIN },
-  });
-  console.log(`Bootstrap admin: ${adminEmail}`);
+  await ensureBootstrapAdmin(prisma, adminEmail);
+  console.log('Bootstrap admin ensured');
 
   if (process.env.NODE_ENV === 'production') return;
 
