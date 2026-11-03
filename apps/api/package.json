@@ -9,7 +9,7 @@
     "typecheck": "prisma generate && tsc --noEmit",
     "test": "jest",
     "test:unit": "jest",
-    "test:int": "jest -c jest.int.config.js --runInBand",
+    "test:int": "prisma generate && jest -c jest.int.config.js --runInBand",
     "test:cov": "jest --coverage",
     "db:dev": "node scripts/dev-db.mjs",
     "prisma:validate": "prisma validate",

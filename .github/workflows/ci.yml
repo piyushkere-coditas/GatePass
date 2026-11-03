@@ -43,9 +43,14 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @gatepass/api test:int
+      - name: Integration tests
+        run: |
+          set -o pipefail
+          pnpm --filter @gatepass/api test:int 2>&1 | tee int.log
         env:
           INT_DB: docker
+      - if: failure()
+        run: bash scripts/ci-annotate.sh "Integration tests failed" int.log
 
   docker-smoke:
     name: Docker compose smoke (SM-I-14)
@@ -53,6 +58,11 @@ jobs:
     needs: verify
     steps:
       - uses: actions/checkout@v4
-      - run: bash scripts/smoke.sh
+      - name: Smoke test
+        run: |
+          set -o pipefail
+          bash scripts/smoke.sh 2>&1 | tee smoke.log
+      - if: failure()
+        run: bash scripts/ci-annotate.sh "Docker smoke failed" smoke.log
       - if: always()
         run: docker compose down -v

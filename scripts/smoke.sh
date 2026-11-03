@@ -9,7 +9,8 @@ wait_for() {
   until [ "$(curl -s -o /dev/null -w '%{http_code}' "$url")" = "200" ]; do
     if [ $SECONDS -ge $deadline ]; then
       echo "FAIL: $name ($url) not healthy within 90 s"
-      docker compose logs --tail=50
+      docker compose ps -a
+      docker compose logs --tail=80
       exit 1
     fi
     sleep 2
