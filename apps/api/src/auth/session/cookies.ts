@@ -6,8 +6,11 @@ export const REFRESH_COOKIE = 'refresh';
 
 /** httpOnly + Secure + SameSite=Lax (AU-6). Browsers accept Secure cookies on http://localhost too. */
 const base: CookieOptions = { httpOnly: true, secure: true, sameSite: 'lax' };
-/** The refresh token is only ever sent to the /auth routes. */
-const REFRESH_PATH = '/auth';
+/**
+ * The refresh token is only ever sent to the /auth routes. Browsers reach the API through a same-origin `/api`
+ * prefix (Vite proxy locally, nginx in AWS), so the cookie path must include it.
+ */
+const REFRESH_PATH = `${process.env.PUBLIC_API_PREFIX ?? '/api'}/auth`;
 
 export function setSessionCookies(res: Response, tokens: SessionTokens): void {
   res.cookie(ACCESS_COOKIE, tokens.accessToken, { ...base, path: '/', maxAge: ACCESS_TTL_MS });

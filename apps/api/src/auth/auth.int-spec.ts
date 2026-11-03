@@ -85,6 +85,8 @@ describe('Sign-in with an email code (Postgres)', () => {
         expect(line).toMatch(/Secure/i);
         expect(line).toMatch(/SameSite=Lax/i);
       }
+      // Browsers reach the API through /api, so the refresh cookie must be scoped there.
+      expect(setCookieLine(res, 'refresh')).toMatch(/Path=\/api\/auth(;|$)/);
       expect((await t.prisma.loginCode.findFirstOrThrow()).consumedAt).toEqual(NOW);
     });
 

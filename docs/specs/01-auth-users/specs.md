@@ -52,6 +52,8 @@ No Google/OAuth dependency and no passwords. Owning the `@coditas.com` mailbox i
 ## UI
 - `/login`: step 1 email field + "Send code"; step 2 six-digit code input (numeric keypad, paste-friendly, auto-submit on 6 digits), "Resend code" after 30 s, "Use a different email". Messages for wrong domain, invalid/expired code, rate limit.
 - Role-based landing as above. An Admin can switch to the employee view.
+- Signed-out users opening a page go to `/login?returnTo=<path>` and return there after sign-in; only same-app paths are accepted (`//evil.com` is ignored). Pressing **Log out / Switch guard** goes to a plain `/login` with an empty email field, so the next guard never lands on the previous guard's page.
+- The SPA calls the API under `/api` (Vite proxy locally, nginx in AWS); the refresh cookie is scoped to `/api/auth` (`PUBLIC_API_PREFIX`).
 - `/admin/users`: list with role/status filters, an "Add user" dialog (email + name + role), a role dropdown and an activate/deactivate toggle, each with confirmation. A "Not signed in yet" badge shows for pre-registered users.
 
 ## Assumption

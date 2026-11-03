@@ -1,0 +1,296 @@
+/* Coditas Gate Pass: tablet-first, large touch targets. Brand violet #9900E6. */
+:root {
+  --brand: #9900e6;
+  --brand-dark: #7300ad;
+  --ink: #1d1d1f;
+  --muted: #5c5c66;
+  --line: #dcd8e2;
+  --bg: #f5f3f7;
+  --surface: #ffffff;
+  --danger: #b3261e;
+  --ok: #1b6e3a;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    Arial,
+    sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  font-size: 16px;
+}
+
+h1 {
+  font-size: 1.6rem;
+  margin: 0 0 1rem;
+}
+
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.page.narrow {
+  max-width: 420px;
+  margin-top: 8vh;
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.page-status {
+  color: var(--muted);
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  margin: 0.75rem 0 0.25rem;
+}
+
+.filters label {
+  display: inline-block;
+  margin-right: 1rem;
+}
+
+input,
+select {
+  font: inherit;
+  padding: 0.6rem 0.75rem;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.page.narrow input {
+  width: 100%;
+}
+
+.code-input {
+  font-size: 1.8rem;
+  letter-spacing: 0.4em;
+  text-align: center;
+}
+
+button {
+  font: inherit;
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+button.primary {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+  font-weight: 600;
+}
+
+button.primary:hover:not(:disabled) {
+  background: var(--brand-dark);
+}
+
+button.big {
+  min-height: 56px;
+  font-size: 1.1rem;
+}
+
+button.link {
+  background: none;
+  border: none;
+  color: var(--brand-dark);
+  text-decoration: underline;
+}
+
+form > button.primary {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.error {
+  color: var(--danger);
+  margin: 0.5rem 0 0;
+}
+
+.row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.row.between {
+  justify-content: space-between;
+  margin-top: 0;
+}
+
+.row.end {
+  justify-content: flex-end;
+}
+
+.stack input,
+.stack select {
+  width: 100%;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+
+.app-header .brand {
+  font-weight: 700;
+  color: var(--brand-dark);
+}
+
+.app-header nav {
+  display: flex;
+  gap: 1rem;
+  flex: 1;
+}
+
+.app-header nav a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.app-header nav a.active {
+  color: var(--brand-dark);
+  font-weight: 600;
+}
+
+.app-header.gate .who {
+  flex: 1;
+  font-size: 1.1rem;
+}
+
+.who-label {
+  color: var(--muted);
+}
+
+table.users {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  margin-top: 1rem;
+}
+
+table.users th,
+table.users td {
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: #efe1fb;
+  color: var(--brand-dark);
+  font-size: 0.8rem;
+}
+
+.status.ok {
+  color: var(--ok);
+}
+
+.status.off {
+  color: var(--muted);
+}
+
+.toast {
+  background: #fdecea;
+  color: var(--danger);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 40%);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.dialog {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: min(440px, 100%);
+}
+
+.dialog h2 {
+  margin-top: 0;
+  font-size: 1.2rem;
+}
+
+.tiles {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.tiles a {
+  display: block;
+  padding: 1.5rem;
+  background: var(--surface);
+  border-radius: 12px;
+  color: var(--brand-dark);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+@media (max-width: 640px) {
+  table.users thead {
+    display: none;
+  }
+
+  table.users td {
+    display: block;
+    border: none;
+    padding: 0.25rem 0.75rem;
+  }
+
+  table.users tr {
+    display: block;
+    border-bottom: 1px solid var(--line);
+    padding: 0.5rem 0;
+  }
+}

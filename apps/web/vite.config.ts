@@ -19,5 +19,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
+    // Component tests type character by character; leave headroom when packages run in parallel (CI, pnpm -r).
+    testTimeout: 15_000,
   },
 });

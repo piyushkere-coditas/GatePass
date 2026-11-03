@@ -1,10 +1,13 @@
 import { render, screen } from '@testing-library/react';
 import { App } from './App';
+import { signedOut } from './test/server';
 
 describe('App shell', () => {
-  it('renders the product name and shared purpose labels (web ↔ shared wiring)', () => {
+  it('[AU-C-05] the real app (BrowserRouter) sends a signed-out user to the login page', async () => {
+    signedOut();
     render(<App />);
-    expect(screen.getByRole('heading', { name: 'Coditas Gate Pass' })).toBeInTheDocument();
-    expect(screen.getByText(/Vendor \/ Delivery/)).toBeInTheDocument();
+
+    expect(await screen.findByLabelText('Coditas email')).toBeInTheDocument();
+    expect(window.location.pathname).toBe('/login');
   });
 });
